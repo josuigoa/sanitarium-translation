@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    # Note this. We are going to use that in further jobs.
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+  build:
+    strategy:
+      matrix:
+        os: 
+          - linux
+          - win
+
+        include:
+          - os: linux
+            out_filename: sanitarium_translation
+          - os: win
+            out_filename: sanitarium_translation.ext
+
+    runs-on: ${{ matrix.os }}
+    needs: create_release # we need to know the upload URL
+
+    steps:
+      - name: Install V
+        uses: vlang/setup-v@v1
+        with:
+          check-latest: true
+
+      - name: Checkout ${{ github.event.repository.name }}
+        uses: actions/checkout@v2
+
+      - name: Check if code is formatted
+        run: |
+          v fmt -diff .
+          v fmt -verify .
+
+      - name: Build ${{ github.event.repository.name }}
+        run: v -prod sanitarium_translation.v
+
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_name: ${{ env.out_filename }}
+          asset_path: ${{ env.out_filename }}
+          asset_content_type: application/octet-stream
