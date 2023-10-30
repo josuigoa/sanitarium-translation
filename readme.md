@@ -15,7 +15,7 @@ This projects helps people to create this RES.000 file with the translated strin
 
 Translate the `strings.txt` (English) texts to the desired language. Please, translate every line one by one, don't add or remove any line. The game will look for lines as they are in the original `strings.txt` file.
 
-Download the helper for [windows]() or [linux]().
+Download the helper for [windows](https://github.com/josuigoa/sanitarium-translation/releases/download/1.0.0/sanitarium_translation.exe) or [linux](https://github.com/josuigoa/sanitarium-translation/releases/download/1.0.0/sanitarium_translation).
 
 When you have the translations in the file `strings.txt`:
 
